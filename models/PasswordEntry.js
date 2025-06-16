@@ -1,0 +1,10 @@
+const mongoose = require('mongoose');
+
+const passwordEntrySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+  site: { type: String, required: true },
+  encryptedPassword: { type: String, required: true },
+  iv: { type: String, required: true },
+});
+
+module.exports = mongoose.model('PasswordEntry', passwordEntrySchema);
