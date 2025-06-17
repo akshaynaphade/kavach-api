@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>KavachKey</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>KavachKey 🔐</h1>
+
+    <section>
+      <h2>Sign Up</h2>
+      <input id="signup-username" placeholder="Username">
+      <input id="signup-password" type="password" placeholder="Password">
+      <button onclick="signup()">Sign Up</button>
+      <p id="signupStatus"></p>
+    </section>
+
+    <section>
+      <h2>Login</h2>
+      <input id="login-username" placeholder="Username">
+      <input id="login-password" type="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <p id="loginStatus"></p>
+    </section>
+
+    <section>
+      <h2>Save Password</h2>
+      <input id="site" placeholder="Website">
+      <input id="sitePassword" placeholder="Password">
+      <button onclick="savePassword()">Save</button>
+      <p id="saveStatus"></p>
+    </section>
+
+    <section>
+      <h2>Stored Passwords</h2>
+      <button onclick="getPasswords()">Load</button>
+      <ul id="passwordList"></ul>
+    </section>
+  </div>
+
+  <script>
+    let token = '';
+    let passwordData = [];
+
+    function signup() {
+      const username = document.getElementById('signup-username').value;
+      const password = document.getElementById('signup-password').value;
+
+      fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('signupStatus').textContent = data.message || 'Signup failed';
+      });
+    }
+
+    function login() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          token = data.token;
+          document.getElementById('loginStatus').textContent = 'Login successful!';
+        } else {
+          document.getElementById('loginStatus').textContent = data.message || 'Login failed';
+        }
+      });
+    }
+
+    function savePassword() {
+      const site = document.getElementById('site').value;
+      const password = document.getElementById('sitePassword').value;
+
+      fetch('/api/passwords', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ site, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('saveStatus').textContent = data.message || 'Saved!';
+      });
+    }
+
+    function getPasswords() {
+      fetch('/api/passwords', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        passwordData = data;
+        const list = document.getElementById('passwordList');
+        list.innerHTML = '';
+        data.forEach((entry, index) => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <strong>${entry.site}</strong>: ${entry.password}
+            <button onclick="editPassword(${index})">Edit</button>
+            <button onclick="deletePassword('${entry.id}')">Delete</button>
+          `;
+          list.appendChild(li);
+        });
+      });
+    }
+
+    function deletePassword(id) {
+      fetch(`/api/passwords/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(res => res.json())
+      .then(() => getPasswords());
+    }
+
+    function editPassword(index) {
+      const newPass = prompt("Enter new password:");
+      const entry = passwordData[index];
+      if (newPass) {
+        fetch(`/api/passwords/${entry.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ password: newPass })
+        })
+        .then(res => res.json())
+        .then(() => getPasswords());
+      }
+    }
+  </script>
+</body>
+</html>
