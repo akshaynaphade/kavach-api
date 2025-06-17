@@ -1,13 +1,14 @@
 {
   "name": "kavach-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "KavachKey API - Secure password management API",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["password", "api", "nodejs", "express", "security", "kavach"],
+  "author": "Akshay Naphade",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
