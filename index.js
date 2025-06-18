@@ -1,43 +1,50 @@
-// index.js
+require('dotenv').config(); // Load .env variables
 
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
-const app = express();
-
-// Middleware
-app.use(express.json());
-app.use(cors());
-
-// Routes
 const userRoutes = require('./routes/userRoutes');
 const passwordRoutes = require('./routes/passwordRoutes');
 
-// Environment Variables Check
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Safety check for missing URI
 if (!process.env.MONGODB_URI) {
-  console.error('❌ MONGODB_URI is missing in your .env file');
-  process.exit(1); // Exit if DB URI is not set
+  throw new Error('❌ MONGODB_URI is missing in .env file!');
 }
 
-// MongoDB Connection
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 })
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1); // Exit if DB connection fails
+.then(() => {
+  console.log('✅ MongoDB connected');
+
+  // Start server only after DB is connected
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
+})
+.catch(err => {
+  console.error('❌ MongoDB Error:', err);
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json());
 
 // API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/passwords', passwordRoutes);
 
-// Start Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+// Static files for frontend (HTML UI)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Default route (optional)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

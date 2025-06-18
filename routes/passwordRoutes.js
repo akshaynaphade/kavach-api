@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PasswordEntry = require('../models/PasswordEntry');
 
-// Save Password
+// Save password
 router.post('/save', async (req, res) => {
   const { userId, platform, username, password } = req.body;
   try {
@@ -14,7 +14,7 @@ router.post('/save', async (req, res) => {
   }
 });
 
-// Get All Passwords for a User
+// Get all passwords for a user
 router.get('/:userId', async (req, res) => {
   try {
     const entries = await PasswordEntry.find({ userId: req.params.userId });
