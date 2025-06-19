@@ -1,6 +1,4 @@
 ![Project Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Release](https://img.shields.io/github/v/release/akshaynaphade/kavach-api?include_prereleases)
-![Website](https://img.shields.io/website?url=https%3A%2F%2Fkavachkey.tech)
 
 # 🛡️ Kavach API
 
